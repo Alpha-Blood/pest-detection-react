@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
+import About from './pages/About.jsx';
 import History from "./pages/History";
 import Upload from "./pages/Upload";
 import Navbar from "./components/Navbar";
@@ -17,6 +18,7 @@ const App = () => {
       <div className="flex-grow">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
           <Route path="/upload" element={<Upload />} />
           <Route path="/history" element={<History />} />
 
