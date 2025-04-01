@@ -1,32 +1,37 @@
 import { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Upload = () => {
   const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(null); // Added image preview
+  const [previewUrl, setPreviewUrl] = useState("");
   const [prediction, setPrediction] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null); // Better error handling
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const handleFileChange = (event) => {
-    const selectedFile = event.target.files[0];
-    setFile(selectedFile);
-    
-    // Create preview URL
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
     if (selectedFile) {
-      setPreview(URL.createObjectURL(selectedFile));
-      setError(null); // Reset error on new file selection
+      // Clean up previous URL first
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      
+      setFile(selectedFile);
+      setPreviewUrl(URL.createObjectURL(selectedFile));
+      setError("");
+      setPrediction(null);
     }
   };
 
   const handleUpload = async () => {
     if (!file) {
-      setError("Please select an image first.");
+      setError("Please select an image first");
       return;
     }
 
     setLoading(true);
-    setError(null);
+    setError("");
+    
     const formData = new FormData();
     formData.append("file", file);
 
@@ -36,11 +41,26 @@ const Upload = () => {
         formData,
         {
           headers: {
-            "Content-Type": "multipart/form-data"
-          }
+            "Content-Type": "multipart/form-data",
+          },
         }
       );
-      setPrediction(response.data);
+
+      const result = response.data;
+      setPrediction(result);
+
+      // Save to localStorage
+      const history = JSON.parse(localStorage.getItem("predictionHistory") || "[]");
+      const newRecord = {
+        id: Date.now(),
+        filename: file.name,
+        prediction: result.prediction,
+        confidence: result.confidence,
+        timestamp: new Date().toISOString(),
+        imageUrl: previewUrl
+      };
+      localStorage.setItem("predictionHistory", JSON.stringify([newRecord, ...history].slice(0, 50)));
+
     } catch (err) {
       setError(err.response?.data?.message || "Error uploading file. Please try again.");
       console.error("Upload error:", err);
@@ -49,33 +69,20 @@ const Upload = () => {
     }
   };
 
+  // ===== FIXED RENDER SECTION =====
   return (
-    <>
-      <section className="pt-40 min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden p-8">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Plant Disease Detection
-            </h1>
-            <p className="text-gray-600 mb-6">
-              Upload an image of your plant for analysis
-            </p>
-          </div>
-
-          {/* Image Preview */}
-          {preview && (
-            <div className="mb-6 flex justify-center">
-              <img 
-                src={preview} 
-                alt="Preview" 
-                className="max-h-64 rounded-lg object-contain border border-gray-200"
-              />
-            </div>
-          )}
+    <div className="flex-1 flex flex-col"> {/* Ensure it grows to fill space */}
+      <div className="container mx-auto px-4 py-8 flex-grow flex flex-col items-center justify-center">
+        <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
+          <h1 className="text-2xl font-bold text-center text-green-700 mb-6">
+            Upload Plant Image
+          </h1>
 
           {/* File Input */}
-          <label className="block mb-6">
-            <span className="sr-only">Choose plant image</span>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Select Image
+            </label>
             <input
               type="file"
               accept="image/*"
@@ -83,12 +90,23 @@ const Upload = () => {
               className="block w-full text-sm text-gray-500
                 file:mr-4 file:py-2 file:px-4
                 file:rounded-md file:border-0
-                file:text-sm file:font-semibold
-                file:bg-green-50 file:text-green-700
-                hover:file:bg-green-100"
+                file:text-sm file:font-medium
+                file:bg-green-100 file:text-green-700
+                hover:file:bg-green-200"
               disabled={loading}
             />
-          </label>
+          </div>
+
+          {/* Image Preview */}
+          {previewUrl && (
+            <div className="mb-4 flex justify-center">
+              <img
+                src={previewUrl}
+                alt="Preview"
+                className="max-h-64 rounded-lg object-contain border border-gray-200"
+              />
+            </div>
+          )}
 
           {/* Error Message */}
           {error && (
@@ -101,23 +119,11 @@ const Upload = () => {
           <button
             onClick={handleUpload}
             disabled={loading}
-            className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
-              loading 
-                ? "bg-gray-400 cursor-not-allowed" 
-                : "bg-green-600 hover:bg-green-700"
-            } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500`}
+            className={`w-full py-2 px-4 rounded-md font-medium text-white ${
+              loading ? "bg-gray-400" : "bg-green-600 hover:bg-green-700"
+            } transition-colors`}
           >
-            {loading ? (
-              <>
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Processing...
-              </>
-            ) : (
-              "Analyze Image"
-            )}
+            {loading ? "Processing..." : "Analyze Image"}
           </button>
 
           {/* Prediction Result */}
@@ -138,8 +144,8 @@ const Upload = () => {
             </div>
           )}
         </div>
-      </section>
-    </>
+      </div>
+    </div>
   );
 };
 

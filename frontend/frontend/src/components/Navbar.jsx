@@ -9,7 +9,7 @@ const Navbar = () => {
       <div className="container mx-auto px-6 py-4 flex justify-between items-center">
         {/* Logo */}
         <Link to="/" className="text-2xl font-bold text-green-600">
-          PestDetectAI
+          PlantDiseaseAI
         </Link>
 
         {/* Desktop Menu */}
@@ -23,8 +23,8 @@ const Navbar = () => {
           <Link to="/upload" className="text-gray-700 hover:text-green-600">
             Upload
           </Link>
-          <Link to="/contact" className="text-gray-700 hover:text-green-600">
-            Contact
+          <Link to="/history" className="text-gray-700 hover:text-green-600">
+            History
           </Link>
         </div>
 
@@ -49,8 +49,8 @@ const Navbar = () => {
           <Link to="/upload" className="block py-2 text-gray-700 hover:text-green-600">
             Upload
           </Link>
-          <Link to="/contact" className="block py-2 text-gray-700 hover:text-green-600">
-            Contact
+          <Link to="/history" className="block py-2 text-gray-700 hover:text-green-600">
+            History
           </Link>
         </div>
       )}
