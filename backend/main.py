@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware  # 👈 Import CORS middleware
 import uvicorn
 import logging
 from database import check_db_connection
@@ -10,6 +11,15 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Pest Disease Prediction API", version="1.0")
+
+# 👇 Add CORS middleware (MUST be before app.include_router!)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # Your Vite frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all HTTP methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allows all headers
+)
 
 # Include API routes
 app.include_router(predictions.router, prefix="/api")

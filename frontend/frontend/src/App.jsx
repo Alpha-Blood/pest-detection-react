@@ -3,6 +3,8 @@ import Home from "./pages/Home";
 import Upload from "./pages/Upload";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import './index.css' // 👈 This is your main CSS file
+
 
 const App = () => {
   return (
