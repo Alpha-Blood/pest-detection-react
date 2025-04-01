@@ -15,7 +15,7 @@ app = FastAPI(title="Pest Disease Prediction API", version="1.0")
 # 👇 Add CORS middleware (MUST be before app.include_router!)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Your Vite frontend URL
+    allow_origins=["http://localhost:5173", "https://pest-detection-react-frontend.onrender.com"],  # Your Vite frontend URL
     allow_credentials=True,
     allow_methods=["*"],  # Allows all HTTP methods (GET, POST, etc.)
     allow_headers=["*"],  # Allows all headers
